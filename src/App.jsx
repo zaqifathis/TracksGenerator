@@ -27,7 +27,6 @@ function App() {
       position,
       rotation // Store the rotation in radians
     }]);
-    setActiveTool(null); 
   };
 
   return (

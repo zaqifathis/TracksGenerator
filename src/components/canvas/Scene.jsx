@@ -32,7 +32,6 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
     
     const exitRotation = (track.rotation || 0) + angle;
 
-    // OCCUPATION CHECK
     // Check if any existing track's start position is already at this end point
     const isOccupied = tracks.some(t => {
       const startPos = new THREE.Vector3(...t.position);
@@ -152,11 +151,6 @@ const Scene = ({ activeTool, tracks, onPlaceTrack }) => {
         tracks={tracks} 
         onPlaceTrack={onPlaceTrack} 
       />
-        
-      {/* Helper to know 0.0.0 pos */}
-      <Sphere args={[4, 32, 32]}>
-        <meshStandardMaterial color="hotpink" />
-      </Sphere>
     </Canvas>
   );
 };
