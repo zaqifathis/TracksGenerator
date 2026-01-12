@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Scene from './components/canvas/Scene';
 import Toolbar from './components/ui/Toolbar';
 import { generateUUID } from 'three/src/math/MathUtils.js';
@@ -8,6 +8,17 @@ function App() {
   const [tracks, setTracks] = useState([]);
 
   console.log('tracksManager: ',  tracks)
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActiveTool(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);    
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const addTrack = (type, position, rotation=0) => {
     setTracks([...tracks, { 
       id: generateUUID(), 
