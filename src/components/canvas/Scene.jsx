@@ -23,7 +23,7 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
       pos: new THREE.Vector3(...track.position),
       // To connect to a START, the new track must be rotated 180 deg (Math.PI) 
       rot: (track.rotation || 0) + Math.PI,
-      isOccupied: track.isStartOccupied,
+      isOccupied: track.prevTrackId !== null,
       parentId: track.id,
       isStartSnap: true
     });
@@ -47,7 +47,7 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
     points.push({
       pos: worldEnd,
       rot: (track.rotation || 0) + angleChange,
-      isOccupied: track.isEndOccupied,
+      isOccupied: track.nextTrackId !== null,
       parentId: track.id,
       isStartSnap: false
     });
@@ -119,7 +119,9 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
   );
 };
 
-const Scene = ({ activeTool, tracks, onPlaceTrack }) => {
+const Scene = ({ activeTool, tracks, onPlaceTrack, onDeleteTrack }) => {
+  const [hoveredId, setHoveredId] = useState(null);
+
   return (
     <Canvas 
         shadows
@@ -149,9 +151,22 @@ const Scene = ({ activeTool, tracks, onPlaceTrack }) => {
             position={[0, -0.01, 0]}   // Tiny offset to prevent flickering with tracks
         />
       
-      {tracks && tracks.map(track => (
+      {tracks.map(track => (
         <group key={track.id} position={track.position} rotation={[0, track.rotation || 0, 0]}>
-          <Track type={track.type} isLeft={track.isLeft} />
+          <Track 
+            type={track.type} 
+            isLeft={track.isLeft} 
+            isSelected={hoveredId === track.id}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              if (!activeTool) setHoveredId(track.id);
+            }}
+            onPointerOut={() => setHoveredId(null)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!activeTool) onDeleteTrack(track.id);
+            }}
+          />
         </group>
       ))}
 
