@@ -11,8 +11,8 @@ export const DUPLO_STUD = 2 * STUD; // 16mm
 // As you noted: Straights are 8 studs long (effective length)
 export const STRAIGHT_LENGTH = 8 * DUPLO_STUD; // 128mm
 
-// Based on the 18x18 quarter-circle (minus 2 studs for centerline)
-export const CURVE_RADIUS = 16 * DUPLO_STUD;    // 256mm
+// TODO: fix the radius
+export const CURVE_RADIUS = 16.3 * DUPLO_STUD;    // 
 
 // 30 degrees (3 pieces = 90 degrees)
 export const CURVE_ANGLE = Math.PI / 6;

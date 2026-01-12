@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const borderRad = '50px';
 const selectedColor = '#cfb912'
 
-const Toolbar = ({ onSelectTool }) => {
+const Toolbar = ({ onSelectTool, onSave, onLoad, onReset }) => {
   const [hovered, setHovered] = useState(null);
 
   const tools = [
@@ -16,17 +16,22 @@ const Toolbar = ({ onSelectTool }) => {
     const isHovered = hovered === id;
 
     return {
-      padding: '10px 20px',
+      padding: '5px 20px',
       margin: '0 5px',
       borderRadius: borderRad,
       border: 'none',
       backgroundColor: isHovered ? selectedColor : (type === 'action' ? baseColor : '#999999'),
       color: 'white',
       cursor: 'pointer',
-      fontWeight: 'bold',
+      fontWeight: 'normal',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      fontSize: '13.3333px', 
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
       transition: 'all 0.2s ease-out',
       transform: isHovered ? 'scale(1.08)' : 'scale(1)',
-      boxShadow: isHovered ? `0 0 10px ${baseColor}` : 'none',
+      boxShadow: isHovered ? `0 0 10px ${'#999999'}` : 'none',
     };
   };
 
@@ -61,19 +66,36 @@ const Toolbar = ({ onSelectTool }) => {
 
       {/* Action Buttons */}
       <button 
-        style={getButtonStyle('save', '#52c796', 'action')}
-        onMouseEnter={() => setHovered('save')}
+        style={getButtonStyle('reset', '#999999', 'action')}
+        onMouseEnter={() => setHovered('reset')} 
         onMouseLeave={() => setHovered(null)}
+        onClick={onReset}
+      >
+        Reset
+      </button>
+
+      <button 
+        style={getButtonStyle('save', '#52c796', 'action')}
+        onMouseEnter={() => setHovered('save')} 
+        onMouseLeave={() => setHovered(null)}
+        onClick={onSave}
       >
         Save
       </button>
-      <button 
+
+      <label 
         style={getButtonStyle('load', '#4758cb', 'action')}
-        onMouseEnter={() => setHovered('load')}
+        onMouseEnter={() => setHovered('load')} 
         onMouseLeave={() => setHovered(null)}
       >
         Load
-      </button>
+        <input 
+          type="file" 
+          accept=".json" 
+          style={{ display: 'none' }}
+          onChange={onLoad} 
+        />
+      </label>
     </div>
   );
 };

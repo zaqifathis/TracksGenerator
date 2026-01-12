@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Line } from '@react-three/drei';
 import * as THREE from 'three';
-import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from '../../utils/constants';
+import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from '../utils/constants';
 
 const Track = ({ 
   type = 'STRAIGHT', 
