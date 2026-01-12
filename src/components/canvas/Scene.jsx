@@ -11,80 +11,79 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
     rot: 0, 
     isOccupied: false, 
     isSnapped: false,
-    parentId: null
+    snapInfo: null
   });
   const SNAP_THRESHOLD = 50;
 
-  const getTrackEndInfo = (track) => {
-    const isStraight = track.type === 'STRAIGHT';
-    const angle = isStraight ? 0 : (track.isLeft ? -CURVE_ANGLE : CURVE_ANGLE);
+  const getSnapPoints = (track) => {
+    const points = [];
     
-    let localEnd = isStraight ? 
-      new THREE.Vector3(0, 0, STRAIGHT_LENGTH): new THREE.Vector3(
+    // --- Start Point Snap (Green Side) ---
+    points.push({
+      pos: new THREE.Vector3(...track.position),
+      // To connect to a START, the new track must be rotated 180 deg (Math.PI) 
+      rot: (track.rotation || 0) + Math.PI,
+      isOccupied: track.isStartOccupied,
+      parentId: track.id,
+      isStartSnap: true
+    });
+
+    // --- End Point Snap (Red Side) ---
+    const isStraight = track.type === 'STRAIGHT';
+    const localEnd = isStraight 
+      ? new THREE.Vector3(0, 0, STRAIGHT_LENGTH)
+      : new THREE.Vector3(
           (CURVE_RADIUS - Math.cos(CURVE_ANGLE) * CURVE_RADIUS) * (track.isLeft ? -1 : 1),
           0,
           Math.sin(CURVE_ANGLE) * CURVE_RADIUS
         );
 
-    // Apply rotation and position to find world end
     const worldEnd = localEnd
       .applyAxisAngle(new THREE.Vector3(0, 1, 0), track.rotation || 0)
       .add(new THREE.Vector3(...track.position));
-    
-    // const exitRotation = (track.rotation || 0) + angle;
 
-    return { 
-      pos: [worldEnd.x, worldEnd.y, worldEnd.z], 
-      rot: (track.rotation || 0) + angle,
-      isOccupied: track.isEndOccupied, 
-      id: track.id 
-    };
+    const angleChange = isStraight ? 0 : (track.isLeft ? -CURVE_ANGLE : CURVE_ANGLE);
+
+    points.push({
+      pos: worldEnd,
+      rot: (track.rotation || 0) + angleChange,
+      isOccupied: track.isEndOccupied,
+      parentId: track.id,
+      isStartSnap: false
+    });
+
+    return points;
   };
 
   const handlePointerMove = (e) => {
     if (!activeTool) return;
+    let bestTarget = null;
+    let minDistance = SNAP_THRESHOLD;
+    tracks.forEach(track => {
+      const snapPoints = getSnapPoints(track);
 
-  const currentMouse = e.point;
-  let bestTarget = null;
-  let minDistance = SNAP_THRESHOLD;
+      snapPoints.forEach(point => {
+        const dist = e.point.distanceTo(point.pos);
+        if (dist < minDistance) {
+          if (!point.isOccupied || !bestTarget || bestTarget.isOccupied) {
+            bestTarget = point;
+            minDistance = dist;
+          }
+        }
+      });
+    });
 
-  for (const track of tracks) {
-    const endInfo = getTrackEndInfo(track);
-    const dist = currentMouse.distanceTo(new THREE.Vector3(...endInfo.pos));
-
-    // Check if this track is a candidate
-    if (dist < minDistance) {
-      // Priority 1: If we find a target that is NOT occupied, it becomes the new best target
-      if (!endInfo.isOccupied) {
-        bestTarget = endInfo;
-        minDistance = dist;
-      } 
-      // Priority 2: If we haven't found any unoccupied target yet, track the occupied one
-      else if (bestTarget === null || bestTarget.isOccupied) {
-        bestTarget = endInfo;
-        // Note: We don't tighten minDistance here so an unoccupied one further away 
-        // (but still under SNAP_THRESHOLD) can still win.
-      }
+    if (bestTarget) {
+      setGhostState({
+        pos: [bestTarget.pos.x, 0, bestTarget.pos.z],
+        rot: bestTarget.rot,
+        isOccupied: bestTarget.isOccupied,
+        isSnapped: true,
+        snapInfo: bestTarget
+      });
+    } else {
+      setGhostState({ pos: [e.point.x, 0, e.point.z], rot: 0, isOccupied: false, isSnapped: false, snapInfo: null });
     }
-  }
-
-  if (bestTarget) {
-    setGhostState({ 
-      pos: bestTarget.pos, 
-      rot: bestTarget.rot, 
-      isOccupied: bestTarget.isOccupied, 
-      isSnapped: true,
-      parentId: bestTarget.id
-    });
-  } else {
-    setGhostState({ 
-      pos: [e.point.x, 0, e.point.z], 
-      rot: 0, 
-      isOccupied: false, 
-      isSnapped: false,
-      parentId: null
-    });
-  }
   };
 
   return (
@@ -98,7 +97,7 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
           const canPlace = isFirstTrack || (ghostState.isSnapped && !ghostState.isOccupied);
 
           if (activeTool && canPlace) {
-            onPlaceTrack(activeTool, ghostState.pos, ghostState.rot, ghostState.parentId);
+            onPlaceTrack(activeTool, ghostState.pos, ghostState.rot, ghostState.snapInfo);
           }
         }}
       >
