@@ -1,78 +1,90 @@
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, GizmoHelper, GizmoViewport, Sphere, Plane } from '@react-three/drei';
+import { OrbitControls, Grid, GizmoHelper, GizmoViewport, Plane } from '@react-three/drei';
 import { DUPLO_STUD, STRAIGHT_LENGTH,CURVE_ANGLE, CURVE_RADIUS } from '../../utils/constants';
 import Track from '../tracks/Track';
 import { useState } from 'react';
 
 const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
-  const [ghostState, setGhostState] = useState({ pos: [0, 0, 0], rot: 0, isOccupied: false, isSnapped: false });
+  const [ghostState, setGhostState] = useState({ 
+    pos: [0, 0, 0], 
+    rot: 0, 
+    isOccupied: false, 
+    isSnapped: false,
+    parentId: null
+  });
   const SNAP_THRESHOLD = 50;
 
   const getTrackEndInfo = (track) => {
     const isStraight = track.type === 'STRAIGHT';
     const angle = isStraight ? 0 : (track.isLeft ? -CURVE_ANGLE : CURVE_ANGLE);
     
-    let localEnd;
-    if (isStraight) {
-      localEnd = new THREE.Vector3(0, 0, STRAIGHT_LENGTH);
-    } else {
-      const direction = track.isLeft ? -1 : 1;
-      localEnd = new THREE.Vector3(
-        (CURVE_RADIUS - Math.cos(CURVE_ANGLE) * CURVE_RADIUS) * direction,
-        0,
-        Math.sin(CURVE_ANGLE) * CURVE_RADIUS
-      );
-    }
+    let localEnd = isStraight ? 
+      new THREE.Vector3(0, 0, STRAIGHT_LENGTH): new THREE.Vector3(
+          (CURVE_RADIUS - Math.cos(CURVE_ANGLE) * CURVE_RADIUS) * (track.isLeft ? -1 : 1),
+          0,
+          Math.sin(CURVE_ANGLE) * CURVE_RADIUS
+        );
 
     // Apply rotation and position to find world end
     const worldEnd = localEnd
       .applyAxisAngle(new THREE.Vector3(0, 1, 0), track.rotation || 0)
       .add(new THREE.Vector3(...track.position));
     
-    const exitRotation = (track.rotation || 0) + angle;
+    // const exitRotation = (track.rotation || 0) + angle;
 
-    // Check if any existing track's start position is already at this end point
-    const isOccupied = tracks.some(t => {
-      const startPos = new THREE.Vector3(...t.position);
-      return startPos.distanceTo(worldEnd) < 5; // 5mm tolerance
-    });
-
-    return { pos: [worldEnd.x, worldEnd.y, worldEnd.z], rot: exitRotation, isOccupied };
+    return { 
+      pos: [worldEnd.x, worldEnd.y, worldEnd.z], 
+      rot: (track.rotation || 0) + angle,
+      isOccupied: track.isEndOccupied, 
+      id: track.id 
+    };
   };
 
   const handlePointerMove = (e) => {
     if (!activeTool) return;
 
-    let snapTarget = null;
-    const currentMouse = e.point;
+  const currentMouse = e.point;
+  let bestTarget = null;
+  let minDistance = SNAP_THRESHOLD;
 
-    for (const track of tracks) {
-      const endInfo = getTrackEndInfo(track);
-      const dist = currentMouse.distanceTo(new THREE.Vector3(...endInfo.pos));
-      
-      if (dist < SNAP_THRESHOLD) {
-        snapTarget = endInfo;
-        break;
+  for (const track of tracks) {
+    const endInfo = getTrackEndInfo(track);
+    const dist = currentMouse.distanceTo(new THREE.Vector3(...endInfo.pos));
+
+    // Check if this track is a candidate
+    if (dist < minDistance) {
+      // Priority 1: If we find a target that is NOT occupied, it becomes the new best target
+      if (!endInfo.isOccupied) {
+        bestTarget = endInfo;
+        minDistance = dist;
+      } 
+      // Priority 2: If we haven't found any unoccupied target yet, track the occupied one
+      else if (bestTarget === null || bestTarget.isOccupied) {
+        bestTarget = endInfo;
+        // Note: We don't tighten minDistance here so an unoccupied one further away 
+        // (but still under SNAP_THRESHOLD) can still win.
       }
     }
+  }
 
-    if (snapTarget) {
-      setGhostState({ 
-        pos: snapTarget.pos, 
-        rot: snapTarget.rot, 
-        isOccupied: 
-        snapTarget.isOccupied, 
-        isSnapped: true 
-      });
-    } else {
-      setGhostState({ 
-        pos: [e.point.x, 0, e.point.z], 
-        rot: 0, 
-        isOccupied: false, 
-        isSnapped: false
-      });
-    }
+  if (bestTarget) {
+    setGhostState({ 
+      pos: bestTarget.pos, 
+      rot: bestTarget.rot, 
+      isOccupied: bestTarget.isOccupied, 
+      isSnapped: true,
+      parentId: bestTarget.id
+    });
+  } else {
+    setGhostState({ 
+      pos: [e.point.x, 0, e.point.z], 
+      rot: 0, 
+      isOccupied: false, 
+      isSnapped: false,
+      parentId: null
+    });
+  }
   };
 
   return (
@@ -82,13 +94,11 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
         rotation={[-Math.PI / 2, 0, 0]} 
         onPointerMove={handlePointerMove}
         onClick={() => {
-          // RULE: Allow placement anywhere if first track. 
-          // Otherwise, must be snapped and NOT occupied.
           const isFirstTrack = tracks.length === 0;
           const canPlace = isFirstTrack || (ghostState.isSnapped && !ghostState.isOccupied);
 
           if (activeTool && canPlace) {
-            onPlaceTrack(activeTool, ghostState.pos, ghostState.rot);
+            onPlaceTrack(activeTool, ghostState.pos, ghostState.rot, ghostState.parentId);
           }
         }}
       >

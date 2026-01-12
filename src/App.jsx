@@ -19,20 +19,31 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const addTrack = (type, position, rotation=0) => {
-    setTracks([...tracks, { 
-      id: generateUUID(), 
-      type: type === 'STRAIGHT' ? 'STRAIGHT' : 'CURVED',
-      isLeft: type === 'CURVE_LEFT',
-      position,
-      rotation // Store the rotation in radians
-    }]);
+  const addTrack = (type, position, rotation=0, parentId = null) => {
+    const newId = generateUUID();
+
+    setTracks((prevTracks) => {
+    const updatedTracks = prevTracks.map((t) =>
+      t.id === parentId ? { ...t, isEndOccupied: true } : t
+    );
+    return [...updatedTracks,
+      {
+        id: newId,
+        type: type === 'STRAIGHT' ? 'STRAIGHT' : 'CURVED',
+        isLeft: type === 'CURVE_LEFT',
+        position,
+        rotation,
+        isEndOccupied: false
+      },
+    ];
+  });
   };
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       <Toolbar onSelectTool={setActiveTool}/>
-      <Scene activeTool={activeTool} 
+      <Scene 
+        activeTool={activeTool} 
         tracks={tracks} 
         onPlaceTrack={addTrack}/>
     </div>
