@@ -1,14 +1,29 @@
-# Tracks Generator
 
-3D configurator for designing Lego Duplo track layouts. Built with React and React Three Fiber (r3f).  
-The app allows users to drag and drop, and snap track pieces together. It implements LDraw Units (LDU).
+
+# Constraint-Based Modular 3D Track Engine
+A browser-based interactive 3D system built with React and React Three Fiber (R3F) that enables users to design modular track layouts using constraint-based snapping and precise spatial transforms.  
+The engine is based on LEGO Duplo train tracks and implements LDraw Units (LDU) from this references. It supports drag-and-drop editing, deterministic connection rules, and serialization of track graphs for saving and loading layouts.
+The architecture separates data representation, interaction logic, and rendering, allowing layouts to be serialized and restored consistently across sessions.
+
+
+## Controls
+- Add Track:
+    - Select a track type and place it on the canvas
+    - Right click for flip the curved track
+    - Press ``ESC`` to unselect the active track
+- Delete track: 
+    - Hover over a placed track and click to remove it
+
 
 ## Available track components
-
+- Standard straight track
+- Standard curved track
+- Bridge (planned)
+- Y track (planned)
+- X track (planned)
 
 
 ## Running the project
-
 ```bash
-npm install         # install dependencies, only for the first time
-npm run dev
+npm install         # install dependencies (first run only)
+npm run dev         # start the development server
