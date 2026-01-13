@@ -15,8 +15,13 @@ const Scene = ({ activeTool, tracks, onPlaceTrack, onDeleteTrack }) => {
         gl={{ antialias: true}} 
         camera={{ position: [500, 500, 500], fov: 45, far: 100000 }}
         onCreated={({ gl }) => {gl.setClearColor('#ecebeb');}}>
-      <ambientLight intensity={0.7} />
-      <pointLight position={[1000, 1000, 1000]} />
+      <ambientLight intensity={1.5} />
+      <directionalLight 
+        position={[100, 200, 100]} 
+        intensity={1.0} 
+        castShadow 
+        shadow-mapSize={[2048, 2048]} // Higher resolution shadows
+      />
       <OrbitControls makeDefault />
 
       {/* Box Viewer Helper */}
