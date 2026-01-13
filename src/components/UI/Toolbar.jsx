@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { glassStyle } from './glassStyle';
 
-const borderRad = '50px';
 const selectedColor = '#cfb912'
+const buttonColor = 'rgba(153, 153, 153, 0.4)'
 
 const Toolbar = ({ onSelectTool, onSave, onLoad, onReset }) => {
   const [hovered, setHovered] = useState(null);
@@ -11,15 +12,25 @@ const Toolbar = ({ onSelectTool, onSave, onLoad, onReset }) => {
     { id: 'CURVED', label: 'Curve', color: selectedColor }
   ];
 
+  const toolbarContainer = {
+    ...glassStyle,
+    position: 'absolute',
+    bottom: '30px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    padding: '15px',
+  };
+
   const getButtonStyle = (id, baseColor, type = 'track') => {
     const isHovered = hovered === id;
 
     return {
       padding: '5px 20px',
       margin: '0 5px',
-      borderRadius: borderRad,
+      borderRadius: glassStyle.borderRadius,
       border: 'none',
-      backgroundColor: isHovered ? selectedColor : (type === 'action' ? baseColor : '#999999'),
+      outline: 'none',
+      backgroundColor: isHovered ? selectedColor : (type === 'action' ? baseColor : buttonColor),
       color: 'white',
       cursor: 'pointer',
       fontWeight: 'normal',
@@ -35,19 +46,7 @@ const Toolbar = ({ onSelectTool, onSave, onLoad, onReset }) => {
   };
 
   return (
-    <div style={{
-      position: 'absolute',
-      bottom: '30px',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      display: 'flex',
-      backgroundColor: 'rgba(238, 238, 238, 0.21)',
-      padding: '15px',
-      borderRadius: borderRad,
-      boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-      backdropFilter: 'blur(8px)',
-      zIndex: 100
-    }}>
+    <div style={toolbarContainer}>
       {/* Track Buttons */}
       {tools.map((tool) => (
         <button
@@ -65,7 +64,7 @@ const Toolbar = ({ onSelectTool, onSave, onLoad, onReset }) => {
 
       {/* Action Buttons */}
       <button 
-        style={getButtonStyle('reset', '#999999', 'action')}
+        style={getButtonStyle('reset', buttonColor, 'action')}
         onMouseEnter={() => setHovered('reset')} 
         onMouseLeave={() => setHovered(null)}
         onClick={onReset}

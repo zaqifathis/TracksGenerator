@@ -12,8 +12,9 @@ const Scene = ({ activeTool, tracks, onPlaceTrack, onDeleteTrack }) => {
     <Canvas 
         shadows
         dpr={[1, 2]} // Optimizes for high-DPI screens (Retina)
-        gl={{ antialias: true }} 
-        camera={{ position: [500, 500, 500], fov: 45, far: 100000 }}>
+        gl={{ antialias: true}} 
+        camera={{ position: [500, 500, 500], fov: 45, far: 100000 }}
+        onCreated={({ gl }) => {gl.setClearColor('#ecebeb');}}>
       <ambientLight intensity={0.7} />
       <pointLight position={[1000, 1000, 1000]} />
       <OrbitControls makeDefault />

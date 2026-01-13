@@ -12,7 +12,7 @@ export const DUPLO_STUD = 2 * STUD; // 16mm
 export const STRAIGHT_LENGTH = 8 * DUPLO_STUD; // 128mm
 
 // TODO: fix the radius
-export const CURVE_RADIUS = 16.3 * DUPLO_STUD;    // 
+export const CURVE_RADIUS = 16 * DUPLO_STUD;    // 
 
 // 30 degrees (3 pieces = 90 degrees)
 export const CURVE_ANGLE = Math.PI / 6;

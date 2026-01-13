@@ -1,26 +1,21 @@
-import React from 'react';
-import { color } from 'three/tsl';
 
-const borderRad = '50px';
+import { glassStyle } from './glassStyle';
+
+const buttonColor = 'rgba(153, 153, 153, 0.4)'
 
 const TrackCounter = ({ tracks = [] }) => {
   const straightCount = tracks.filter(t => t.type === 'STRAIGHT').length;
   const curveCount = tracks.filter(t => t.type === 'CURVED').length;
 
   const containerStyle = {
+    ...glassStyle,
     position: 'absolute',
     top: '20px',
     left: '50%',
     transform: 'translateX(-50%)',
-    display: 'flex',
     alignItems: 'center',
     gap: '25px', // Gap between the Straight group and Curve group
-    backgroundColor: 'rgba(238, 238, 238, 0.21)',
     padding: '6px 12px',
-    borderRadius: borderRad,
-    boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-    backdropFilter: 'blur(8px)',
-    zIndex: 100,
     fontFamily: 'system-ui, -apple-system, sans-serif',
     fontSize: '13px',
     color: 'white',
@@ -31,7 +26,7 @@ const TrackCounter = ({ tracks = [] }) => {
   const labelPillStyle = (color) => ({
     backgroundColor: color,
     padding: '4px 12px',
-    borderRadius: borderRad,
+    borderRadius: glassStyle.borderRadius,
     fontWeight: '500',
     display: 'inline-block',
   });
@@ -53,13 +48,13 @@ const TrackCounter = ({ tracks = [] }) => {
     <div style={containerStyle}>
       {/* Straight Section */}
       <div style={sectionStyle}>
-        <div style={labelPillStyle('#999999')}>Straight</div>
+        <div style={labelPillStyle(buttonColor)}>Straight</div>
         <div style={numberStyle}>{straightCount}</div>
       </div>
 
       {/* Curve Section */}
       <div style={sectionStyle}>
-        <div style={labelPillStyle('#999999')}>Curve</div>
+        <div style={labelPillStyle(buttonColor)}>Curve</div>
         <div style={numberStyle}>{curveCount}</div>
       </div>
     </div>
