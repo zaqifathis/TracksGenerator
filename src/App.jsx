@@ -121,7 +121,7 @@ function App() {
 
       updatedTracks = updatedTracks.map(t => {
         const startPos = new THREE.Vector3(...t.position);
-        if (!t.prevTrackId && startPos.distanceTo(worldEnd) < 5) {
+        if (!t.prevTrackId && startPos.distanceTo(worldEnd) < 15) {
           newTrack.nextTrackId = t.id;
           return { ...t, prevTrackId: newTrack.id };
         }
