@@ -79,7 +79,7 @@ function App() {
     reader.readAsText(file);
   };
 
-  const addTrack = (type, position, rotation = 0, snapInfo = null) => {
+  const addTrack = (type, position, rotation = 0, snapInfo = null, isLeftOverride=false) => {
     const newId = generateUUID();
 
     setTracks((prevTracks) => {
@@ -97,7 +97,7 @@ function App() {
       const newTrack = {
         id: newId,
         type: type === 'STRAIGHT' ? 'STRAIGHT' : 'CURVED',
-        isLeft: type === 'CURVE_LEFT',
+        isLeft: type === 'STRAIGHT' ? false : isLeftOverride,
         position,
         rotation,
         prevTrackId: snapInfo ? snapInfo.parentId : null,

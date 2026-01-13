@@ -8,8 +8,7 @@ const Toolbar = ({ onSelectTool, onSave, onLoad, onReset }) => {
 
   const tools = [
     { id: 'STRAIGHT', label: 'Straight', color: selectedColor },
-    { id: 'CURVE_LEFT', label: 'Curve Left', color: selectedColor },
-    { id: 'CURVE_RIGHT', label: 'Curve Right', color: selectedColor },
+    { id: 'CURVED', label: 'Curve', color: selectedColor }
   ];
 
   const getButtonStyle = (id, baseColor, type = 'track') => {

@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { STRAIGHT_LENGTH,CURVE_ANGLE, CURVE_RADIUS } from '../utils/constants';
 import { Plane } from '@react-three/drei';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Track from './Track';
 
 const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
+  const [isLeft, setIsLeft] = useState(false);
   const [ghostState, setGhostState] = useState({ 
     pos: [0, 0, 0], 
     rot: 0, 
@@ -13,6 +14,10 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
     snapInfo: null
   });
   const SNAP_THRESHOLD = 50;
+
+  useEffect(() => {
+    setIsLeft(false);
+  }, [activeTool]);
 
   const getSnapPoints = (track) => {
     const points = [];
@@ -91,12 +96,17 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
         args={[10000, 10000]} 
         rotation={[-Math.PI / 2, 0, 0]} 
         onPointerMove={handlePointerMove}
+        onContextMenu={(e) => {
+          if (!activeTool) return;
+          e.nativeEvent.preventDefault(); // Stop the browser menu
+          setIsLeft(!isLeft);
+        }}
         onClick={() => {
           const isFirstTrack = tracks.length === 0;
           const canPlace = isFirstTrack || (ghostState.isSnapped && !ghostState.isOccupied);
 
           if (activeTool && canPlace) {
-            onPlaceTrack(activeTool, ghostState.pos, ghostState.rot, ghostState.snapInfo);
+            onPlaceTrack(activeTool, ghostState.pos, ghostState.rot, ghostState.snapInfo, isLeft);
           }
         }}
       >
@@ -107,7 +117,7 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
         <group position={ghostState.pos} rotation={[0, ghostState.rot, 0]}>
           <Track 
             type={activeTool === 'STRAIGHT' ? 'STRAIGHT' : 'CURVED'} 
-            isLeft={activeTool === 'CURVE_LEFT'} 
+            isLeft={activeTool === 'STRAIGHT' ? false : isLeft} 
             isGhost
             isOccupied={ghostState.isOccupied}
             isSnapped={ghostState.isSnapped}
