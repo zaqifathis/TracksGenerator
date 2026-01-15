@@ -18,10 +18,10 @@ The architecture separates data representation, interaction logic, and rendering
 ## Available track components
 - Standard straight track
 - Standard curved track
+- Y track
+- X track 
 - Bridge (planned)
-- Y track (planned)
-- X track (planned)
-
+- 
 
 ## Running the project
 ```bash
