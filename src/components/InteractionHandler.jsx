@@ -1,25 +1,26 @@
 import * as THREE from 'three';
 import { STRAIGHT_LENGTH,CURVE_ANGLE, CURVE_RADIUS } from '../utils/constants';
 import { Plane } from '@react-three/drei';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Track from './Track';
 
 const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
   const [isLeft, setIsLeft] = useState(false);
-  const [ghostState, setGhostState] = useState({ 
-    pos: [0, 0, 0], 
-    rot: 0, 
-    isOccupied: false, 
-    isSnapped: false,
-    snapInfo: null
-  });
+  const [ghostPortIndex, setGhostPortIndex] = useState(0);
+  const [mousePos, setMousePos] = useState(new THREE.Vector3(0, 0, 0));
   const SNAP_THRESHOLD = 30;
 
   useEffect(() => {
     setIsLeft(false);
+    setGhostPortIndex(0);
   }, [activeTool]);
 
-  const getPorts = (track) => {
+  const handlePointerMove = (e) => {
+    if (!activeTool) return;
+    setMousePos(e.point); // Just update the raw position
+  };
+
+   const getPorts = (track) => {
     const ports = [];
     const { type, rotation = 0, position, isLeft: trackIsLeft } = track;
     const posVec = new THREE.Vector3(...position);
@@ -85,15 +86,17 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
     });
   };
 
-  const handlePointerMove = (e) => {
-    if (!activeTool) return;
+  const ghostState = useMemo(() => {
+    if (!activeTool) return null;
+
     let bestTarget = null;
     let minDistance = SNAP_THRESHOLD;
 
+    // 1. Find Snap Target
     tracks.forEach(track => {
-      const ports = getPorts(track);
+      const ports = getPorts(track); 
       ports.forEach(port => {
-        const dist = e.point.distanceTo(port.pos);
+        const dist = mousePos.distanceTo(port.pos);
         if (dist < minDistance) {
           bestTarget = port;
           minDistance = dist;
@@ -101,35 +104,64 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
       });
     });
 
-    if (bestTarget) {
-      let finalPos = [bestTarget.pos.x, 0, bestTarget.pos.z];
-      let finalRot = bestTarget.rot;
+    // 2. UNIVERSAL ANCHOR LOGIC
+    let selectedLocalPort = { pos: new THREE.Vector3(0, 0, 0), rot: 0 };
 
-      // SPECIAL LOGIC FOR X_TRACK GHOST
-      // Since X_TRACK pivot is at the center, we must offset the position 
-      // so the PORT (edge) hits the snap target, not the center.
-      if (activeTool === 'X_TRACK') {
-        const half = STRAIGHT_LENGTH / 2;
-        const offset = new THREE.Vector3(0, 0, half).applyAxisAngle(new THREE.Vector3(0, 1, 0), finalRot);
-        finalPos = [bestTarget.pos.x + offset.x, 0, bestTarget.pos.z + offset.z];
-      }
-
-      setGhostState({
-        pos: finalPos,
-        rot: finalRot,
-        isOccupied: false, // Need to check connection logic later
-        isSnapped: true,
-        snapInfo: bestTarget
-      });
+    if (activeTool === 'Y_TRACK') {
+      const yPorts = ['base', 'left', 'right'];
+      const activePortId = yPorts[ghostPortIndex % 3];
+      const localPorts = {
+        base: { pos: new THREE.Vector3(0, 0, 0), rot: 0 },
+        left: { 
+          pos: new THREE.Vector3((CURVE_RADIUS - Math.cos(CURVE_ANGLE) * CURVE_RADIUS) * -1, 0, Math.sin(CURVE_ANGLE) * CURVE_RADIUS), 
+          rot: -CURVE_ANGLE + Math.PI
+        },
+        right: { 
+          pos: new THREE.Vector3((CURVE_RADIUS - Math.cos(CURVE_ANGLE) * CURVE_RADIUS) * 1, 0, Math.sin(CURVE_ANGLE) * CURVE_RADIUS), 
+          rot: CURVE_ANGLE + Math.PI
+        }
+      };
+      selectedLocalPort = localPorts[activePortId];
+    } else if (activeTool === 'X_TRACK') {
+      const xPorts = ['a_start', 'b_start'];
+      const activePortId = xPorts[ghostPortIndex % 2];
+      const angle = Math.PI / 3; // 60 deg
+      const half = STRAIGHT_LENGTH / 2;
+      const localPorts = {
+        a_start: { pos: new THREE.Vector3(0, 0, -half), rot: 0 },
+        a_end: { pos: new THREE.Vector3(0, 0, half), rot: Math.PI },
+        b_start: { pos: new THREE.Vector3(-Math.sin(angle) * half, 0, -Math.cos(angle) * half), rot: angle },
+        b_end: { pos: new THREE.Vector3(Math.sin(angle) * half, 0, Math.cos(angle) * half), rot: angle + Math.PI }
+      };
+      selectedLocalPort = localPorts[activePortId];
     } else {
-      setGhostState({ 
-        pos: [e.point.x, 0, e.point.z], 
-        rot: 0, 
-        isOccupied: false, 
-        isSnapped: false, 
-        snapInfo: null });
+      // STRAIGHT and CURVED always "grab" by the start [0,0,0]
+      selectedLocalPort = { pos: new THREE.Vector3(0, 0, 0), rot: 0 };
     }
-  };
+
+    let finalRot = 0;
+    let finalPosVec = mousePos.clone();
+    let isSnapped = false;
+
+    if (bestTarget) {
+      isSnapped = true;
+      // Align so ghost faces AWAY from parent (+ Math.PI)
+      finalRot = bestTarget.rot - selectedLocalPort.rot;
+      const worldOffset = selectedLocalPort.pos.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), finalRot);
+      finalPosVec = bestTarget.pos.clone().sub(worldOffset);
+    } else {
+      finalRot = -selectedLocalPort.rot; 
+      const worldOffset = selectedLocalPort.pos.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), finalRot);
+      finalPosVec.sub(worldOffset);
+    }
+
+    return {
+      pos: [finalPosVec.x, 0, finalPosVec.z],
+      rot: finalRot,
+      isSnapped: isSnapped,
+      snapInfo: isSnapped ? { ...bestTarget, ghostPortIndex: ghostPortIndex } : null
+    };
+  }, [mousePos, ghostPortIndex, activeTool, tracks, isLeft]);
 
   return (
     <>
@@ -140,7 +172,11 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
         onContextMenu={(e) => {
           if (!activeTool) return;
           e.nativeEvent.preventDefault();
-          setIsLeft(!isLeft);
+
+          if (activeTool === 'CURVED') setIsLeft(!isLeft); 
+          else if (activeTool === 'Y_TRACK' || activeTool === 'X_TRACK') {
+            setGhostPortIndex(prev => prev + 1); // Cycle snapping port
+          }
         }}
         onClick={() => {
           const isFirstTrack = tracks.length === 0;

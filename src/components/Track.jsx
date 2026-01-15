@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from '../utils/constants';
 import {TrackStraight} from './models/TrackStraight';
 
-const baseColor = '#a3a3a3'
 
 const Track = ({ 
   position= [0, 0, 0],
@@ -88,7 +87,10 @@ const Track = ({
     else if (isSnapped) trackColor = '#cfb912';
     else trackColor = '#a3a3a3';
   } else {
-    trackColor = type === 'STRAIGHT' ? '#0b3c66' : isLeft ? '#ac269a' : '#14c4ff';
+      if (type === "STRAIGHT") trackColor = '#0b3c66'
+      if (type === "CURVED") trackColor = '#7e0c6b'
+      if (type === "Y_TRACK") trackColor = '#b31552'
+      if (type === "X_TRACK") trackColor = '#0e798b'
   }
 
   return (
@@ -113,10 +115,10 @@ const Track = ({
             key={index}
             points={pts}
             visible={true} 
-            color={baseColor} 
+            color={trackColor} 
             lineWidth={isSelected ? 6 : (isGhost ? 5 : 3)} 
-            transparent={isGhost || isInactivePath} 
-            opacity={isInactivePath ? 0.2 : (isGhost ? 0.5 : 1)}
+            transparent={isGhost} 
+            opacity={isGhost ? 0.5 : 1}
           />
         );
       })}

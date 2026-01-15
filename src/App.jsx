@@ -1,11 +1,12 @@
-import * as THREE from 'three';
-import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from './utils/constants';
+
 import { useState, useEffect } from 'react';
 import Scene from './components/Scene';
 import Toolbar from './components/UI/Toolbar';
 import TrackCounter from './components/UI/TrackCounter';
 import { generateUUID } from 'three/src/math/MathUtils.js';
 
+
+// --- File Validator ---
 const isValidTrackData = (data) => {
   if (!Array.isArray(data)) return false;
   return data.every(track => (
@@ -28,6 +29,7 @@ function App() {
 
   const resetTracks = () => setTracks([]);
 
+  // --- SAVE TRACKS ---
   const saveTracks = () => {
     const dataStr = JSON.stringify(tracks, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -39,6 +41,7 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
+  // --- LOAD TRACKS ---
   const loadTracks = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -62,21 +65,22 @@ function App() {
       let updatedTracks = prevTracks.map((t) => {
         if (snapInfo && t.id === snapInfo.parentId) {
           return {
-            ...t,
-            connections: {
-              ...(t.connections || {}),
-              [snapInfo.id]: newId // Connect specifically to the port used (e.g. 'left', 'end')
-            }
+            ...t, connections: {...(t.connections || {}), [snapInfo.id]: newId }
           };
         }
         return t;
       });
 
-      // 2. Create the new track object
-      // We assume the new track connects via its "primary" port
+      // 2. Identify which port on the NEW track connects to the parent
       let primaryPort = 'start';
-      if (type === 'Y_TRACK') primaryPort = 'base';
-      if (type === 'X_TRACK') primaryPort = 'a_start';
+      if (type === 'Y_TRACK') {
+        const yPorts = ['base', 'left', 'right'];
+        primaryPort = yPorts[snapInfo?.ghostPortIndex % 3 || 0];
+      } 
+      else if (type === 'X_TRACK') {
+        const xPorts = ['a_start', 'b_start'];
+        primaryPort = xPorts[snapInfo?.ghostPortIndex % 2 || 0];
+      }
 
       const newTrack = {
         id: newId,
@@ -85,9 +89,7 @@ function App() {
         position,
         rotation,
         activeState: 0, // Toggle for Y-switch or X-height
-        connections: {
-          [primaryPort]: snapInfo ? snapInfo.parentId : null
-        }
+        connections: {[primaryPort]: snapInfo ? snapInfo.parentId : null}
       };
 
       // Note: Spatial loop closure check for multiple ports is complex 
