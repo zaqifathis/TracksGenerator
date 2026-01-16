@@ -26,7 +26,13 @@ const Scene = ({ activeTool, tracks, onPlaceTrack, onDeleteTrack}) => {
         shadow-mapSize={[2048, 2048]} 
       />
 
-      <OrbitControls makeDefault />
+      <OrbitControls 
+        makeDefault 
+        minDistance={100}   
+        maxDistance={3000}
+        enableDamping={true} 
+        dampingFactor={0.05}
+      />
 
       <GizmoHelper alignment="top-right" margin={[80, 80]}>
         <GizmoViewport axisColors={['red', 'green', 'blue']} labelColor="black" />
