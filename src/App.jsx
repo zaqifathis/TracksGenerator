@@ -11,7 +11,7 @@ const isValidTrackData = (data) => {
   if (!Array.isArray(data)) return false;
   return data.every(track => (
     typeof track.id === 'string' &&
-    ['STRAIGHT', 'CURVED', 'Y_TRACK', 'X_TRACK'].includes(track.type) &&
+    ['STRAIGHT', 'CURVED', 'Y_TRACK', 'X_TRACK', 'CROSS_90'].includes(track.type) &&
     Array.isArray(track.position) &&
     typeof track.rotation === 'number'
   ));
@@ -74,7 +74,7 @@ function App() {
       // 2. Identify which port on the NEW track connects to the parent
       let primaryPort = 'start';
       if (type === 'Y_TRACK') {
-        const yPorts = ['base', 'left', 'right'];
+        const yPorts = ['start', 'end_left', 'end_right'];
         primaryPort = yPorts[snapInfo?.ghostPortIndex % 3 || 0];
       } 
       else if (type === 'X_TRACK') {
@@ -91,8 +91,6 @@ function App() {
         connections: {[primaryPort]: snapInfo ? snapInfo.parentId : null}
       };
 
-      // Note: Spatial loop closure check for multiple ports is complex 
-      // and usually better handled in InteractionHandler.
       return [...updatedTracks, newTrack];
     });
   };

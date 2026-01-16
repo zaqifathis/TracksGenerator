@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { glassStyle } from './glassStyle';
-import { StraightIcon, CurveIcon, YIcon, XIcon, ActionIcon } from './Icons';
+import { StraightIcon, CurveIcon, YIcon, XIcon, Cross90Icon, ActionIcon } from './Icons';
 
 // UI Colors
 const activeTrackColor = '#0ceda2'; 
@@ -15,7 +15,8 @@ const Toolbar = ({ activeTool, onSelectTool, onSave, onLoad, onReset }) => {
     { id: 'STRAIGHT', label: 'Straight Track', icon: <StraightIcon /> },
     { id: 'CURVED', label: 'Curve Track', icon: <CurveIcon /> },
     { id: 'Y_TRACK', label: 'Y-Switch', icon: <YIcon /> },
-    { id: 'X_TRACK', label: 'X-Crossing', icon: <XIcon /> }
+    { id: 'X_TRACK', label: 'X-Crossing', icon: <XIcon /> },
+    { id: 'CROSS_90', label: '90° Cross', icon: <Cross90Icon /> }
   ];
 
   // Construction Tools (Left Side) - Primary

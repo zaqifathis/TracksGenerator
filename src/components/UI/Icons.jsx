@@ -4,8 +4,6 @@
 export const StraightIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
     <line x1="12" y1="2" x2="12" y2="22" />
-    <line x1="8" y1="4" x2="8" y2="20" opacity="0.3" strokeWidth="1"/>
-    <line x1="16" y1="4" x2="16" y2="20" opacity="0.3" strokeWidth="1"/>
   </svg>
 );
 
@@ -25,6 +23,15 @@ export const XIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
     <line x1="12" y1="2" x2="12" y2="22" />
     <line x1="4" y1="8" x2="20" y2="16" />
+  </svg>
+);
+
+export const Cross90Icon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    {/* Main Vertical Rail */}
+    <line x1="12" y1="2" x2="12" y2="22" />
+    {/* Main Horizontal Rail */}
+    <line x1="2" y1="12" x2="22" y2="12" />
   </svg>
 );
 

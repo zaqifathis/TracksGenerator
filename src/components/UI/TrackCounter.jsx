@@ -1,5 +1,5 @@
 import { glassStyle } from './glassStyle';
-import { StraightIcon, CurveIcon, YIcon, XIcon } from './Icons';
+import { StraightIcon, CurveIcon, YIcon, XIcon, Cross90Icon } from './Icons';
 
 // Styled to be dark grey/black for better visibility on the light glass
 const darkColor = '#7a7a7a'; 
@@ -10,6 +10,7 @@ const TrackCounter = ({ tracks = [] }) => {
   const curveCount = tracks.filter(t => t.type === 'CURVED').length;
   const yCount = tracks.filter(t => t.type === 'Y_TRACK').length;
   const xCount = tracks.filter(t => t.type === 'X_TRACK').length;
+  const cross90Count = tracks.filter(t => t.type === 'CROSS_90').length;
 
   const containerStyle = {
     ...glassStyle,
@@ -55,6 +56,7 @@ const TrackCounter = ({ tracks = [] }) => {
       <CounterItem icon={<CurveIcon />} count={curveCount} label="Curves" />
       <CounterItem icon={<YIcon />} count={yCount} label="Y-Switches" />
       <CounterItem icon={<XIcon />} count={xCount} label="X-Crossings" />
+      <CounterItem icon={<Cross90Icon />} count={cross90Count} label="90-Crosses" />
     </div>
   );
 };

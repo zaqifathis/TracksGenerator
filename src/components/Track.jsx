@@ -5,9 +5,10 @@ import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from '../utils/constants';
 
 import {TrackStraight} from './models/TrackStraight';
 import { TrackCurved } from './models/TrackCurved';
-import { TrackCross } from './models/TrackCross60';
+import { TrackCross60 } from './models/TrackCross60';
 import { TrackCurvedLeft } from './models/TrackCurvedLeft';
 import { TrackYSwitch } from './models/TrackYSwitch';
+import { TrackCross90 } from './models/TrackCross90';
 
 const Track = ({ 
   position= [0, 0, 0],
@@ -79,6 +80,15 @@ const Track = ({
       return [pathA, pathB];
     }
 
+    // --- CROSS_90 (Pivot at Origin) ---
+    if (type === 'CROSS_90') {
+      const half = STRAIGHT_LENGTH / 2;
+      return [
+        [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, STRAIGHT_LENGTH)],
+        [new THREE.Vector3(-half, 0, half), new THREE.Vector3(half, 0, half)],
+      ];
+    }
+
     return [];
   }, [type, isLeft]);
 
@@ -116,7 +126,7 @@ const Track = ({
         (<TrackCurved isGhost={isGhost} isOccupied={isOccupied} isSnapped={isSnapped}/>)
       )}
       {type === 'X_TRACK' && (
-        <TrackCross 
+        <TrackCross60 
           isGhost={isGhost}
           isOccupied={isOccupied}
           isSnapped={isSnapped}
@@ -124,6 +134,13 @@ const Track = ({
       )}
       {type === 'Y_TRACK' && (
         <TrackYSwitch 
+          isGhost={isGhost}
+          isOccupied={isOccupied}
+          isSnapped={isSnapped}
+        />
+      )}
+      {type === 'CROSS_90' && (
+        <TrackCross90 
           isGhost={isGhost}
           isOccupied={isOccupied}
           isSnapped={isSnapped}

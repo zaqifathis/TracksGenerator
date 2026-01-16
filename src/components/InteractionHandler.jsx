@@ -46,16 +46,16 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
 
     // 3. Y_TRACK: 1 Base Port, 2 Exit Ports
     else if (type === 'Y_TRACK') {
-      ports.push({ pos: new THREE.Vector3(0, 0, 0), rot: rotation + Math.PI, id: 'base' });
+      ports.push({ pos: new THREE.Vector3(0, 0, 0), rot: rotation + Math.PI, id: 'start' });
       // Left exit
       ports.push({ 
         pos: new THREE.Vector3((CURVE_RADIUS - Math.cos(CURVE_ANGLE) * CURVE_RADIUS) * -1, 0, Math.sin(CURVE_ANGLE) * CURVE_RADIUS), 
-        rot: rotation - CURVE_ANGLE, id: 'left' 
+        rot: rotation - CURVE_ANGLE, id: 'end_left' 
       });
       // Right exit
       ports.push({ 
         pos: new THREE.Vector3((CURVE_RADIUS - Math.cos(CURVE_ANGLE) * CURVE_RADIUS) * 1, 0, Math.sin(CURVE_ANGLE) * CURVE_RADIUS), 
-        rot: rotation + CURVE_ANGLE, id: 'right' 
+        rot: rotation + CURVE_ANGLE, id: 'end_right' 
       });
     }
 
@@ -73,6 +73,16 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
         pos: new THREE.Vector3(Math.sin(angle) * half, 0, Math.cos(angle) * half), 
         rot: rotation + angle, id: 'b_end' 
       });
+    }
+
+    // 5. CROSS_90: 4 Ports (North, South, East, West)
+    else if (type === 'CROSS_90') {
+      const half = STRAIGHT_LENGTH / 2;
+      // Ports for other tracks to snap TO:
+      ports.push({ pos: new THREE.Vector3(0, 0, 0), rot: rotation + Math.PI, id: 'a_start' });
+      ports.push({ pos: new THREE.Vector3(0, 0, STRAIGHT_LENGTH), rot: rotation, id: 'a_end' });
+      ports.push({ pos: new THREE.Vector3(-half, 0, half), rot: rotation - Math.PI / 2, id: 'b_start' });
+      ports.push({ pos: new THREE.Vector3(half, 0, half), rot: rotation + Math.PI / 2, id: 'b_end' });
     }
 
     // Convert local ports to World Space
@@ -105,7 +115,7 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
       });
     });
 
-    // 2. UNIVERSAL ANCHOR LOGIC
+    // UNIVERSAL ANCHOR LOGIC
     let selectedLocalPort = { pos: new THREE.Vector3(0, 0, 0), rot: 0 };
 
     if (activeTool === 'Y_TRACK') {
