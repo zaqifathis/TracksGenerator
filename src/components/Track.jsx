@@ -5,6 +5,7 @@ import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from '../utils/constants';
 import {TrackStraight} from './models/TrackStraight';
 import { TrackCurved } from './models/TrackCurved';
 import { TrackCross } from './models/TrackCross60';
+import { TrackCurvedLeft } from './models/TrackCurvedLeft';
 
 const Track = ({ 
   position= [0, 0, 0],
@@ -109,11 +110,8 @@ const Track = ({
         />
       )}
       {type === 'CURVED' && (
-        <TrackCurved 
-          isGhost={isGhost}
-          isOccupied={isOccupied}
-          isSnapped={isSnapped}
-        />
+        isLeft ? (<TrackCurvedLeft isGhost={isGhost} isOccupied={isOccupied} isSnapped={isSnapped}/>) : 
+        (<TrackCurved isGhost={isGhost} isOccupied={isOccupied} isSnapped={isSnapped}/>)
       )}
       {type === 'X_TRACK' && (
         <TrackCross 
