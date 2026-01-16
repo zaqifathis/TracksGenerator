@@ -6,8 +6,8 @@ import React, { useRef } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { interactionColor } from '../../utils/constants';
 
-export function TrackStraight({ isGhost, isOccupied, isSnapped, ...props }) {
-  const { nodes, materials } = useGLTF('/models/track_straight-opt.glb')
+export function TrackCross({ isGhost, isOccupied, isSnapped, ...props }) {
+  const { nodes, materials } = useGLTF('/models/track_cross-opt.glb')
 
   const getMaterialColor = () => {
     if (isOccupied) return interactionColor.occupied;
@@ -18,10 +18,11 @@ export function TrackStraight({ isGhost, isOccupied, isSnapped, ...props }) {
   return (
     <group {...props} dispose={null}>
       <mesh
-        name="straight"
+        name="cross60"
         castShadow={true}
         receiveShadow={true}
-        geometry={nodes.straight.geometry}
+        geometry={nodes.cross60.geometry}
+        material={nodes.cross60.material}
       >
         <meshStandardMaterial 
           color={getMaterialColor()}
@@ -35,4 +36,4 @@ export function TrackStraight({ isGhost, isOccupied, isSnapped, ...props }) {
   )
 }
 
-useGLTF.preload('/models/track_straight-opt.glb')
+useGLTF.preload('/models/track_cross-opt.glb')

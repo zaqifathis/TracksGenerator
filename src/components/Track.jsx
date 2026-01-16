@@ -3,7 +3,8 @@ import { Line, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from '../utils/constants';
 import {TrackStraight} from './models/TrackStraight';
-
+import { TrackCurved } from './models/TrackCurved';
+import { TrackCross } from './models/TrackCross60';
 
 const Track = ({ 
   position= [0, 0, 0],
@@ -102,6 +103,20 @@ const Track = ({
     >
       {type === 'STRAIGHT' && (
         <TrackStraight 
+          isGhost={isGhost}
+          isOccupied={isOccupied}
+          isSnapped={isSnapped}
+        />
+      )}
+      {type === 'CURVED' && (
+        <TrackCurved 
+          isGhost={isGhost}
+          isOccupied={isOccupied}
+          isSnapped={isSnapped}
+        />
+      )}
+      {type === 'X_TRACK' && (
+        <TrackCross 
           isGhost={isGhost}
           isOccupied={isOccupied}
           isSnapped={isSnapped}
