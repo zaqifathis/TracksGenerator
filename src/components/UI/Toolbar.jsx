@@ -3,10 +3,10 @@ import { glassStyle } from './glassStyle';
 import { StraightIcon, CurveIcon, YIcon, XIcon, ActionIcon } from './Icons';
 
 // UI Colors
-const activeTrackColor = '#0ceda2'; // Vibrant green for active track
-const idleTrackColor = 'rgba(177, 174, 4, 0.89)'; // Your yellow/gold
-const utilityColor = 'rgba(186, 186, 186, 0.89)'; // Grey for actions
-const iconColor = '#222222'; // Dark color for icons
+const activeTrackColor = '#0ceda2'; 
+const idleTrackColor = 'rgba(177, 174, 4, 0.89)'; 
+const utilityColor = 'rgba(186, 186, 186, 0.89)'; 
+const iconColor = '#222222'; 
 
 const Toolbar = ({ activeTool, onSelectTool, onSave, onLoad, onReset }) => {
   const [hovered, setHovered] = useState(null);
@@ -18,24 +18,40 @@ const Toolbar = ({ activeTool, onSelectTool, onSave, onLoad, onReset }) => {
     { id: 'X_TRACK', label: 'X-Crossing', icon: <XIcon /> }
   ];
 
-  // The Main Parent that centers everything
-  const masterWrapper = {
+  // Construction Tools (Left Side) - Primary
+  const leftWrapper = {
     position: 'absolute',
-    bottom: '30px',
-    left: '50%',
-    transform: 'translateX(-50%)',
+    top: '50%',
+    left: '20px',
+    transform: 'translateY(-50%)',
     display: 'flex',
-    alignItems: 'center',
-    gap: '24px', // Space between the two glass boundaries
-    userSelect: 'none',
+    flexDirection: 'column',
+    gap: '20px',
+    zIndex: 1000
+  };
+
+  // Utility Actions (Right Side) - Secondary
+  const rightWrapper = {
+    position: 'absolute',
+    top: '50%',
+    right: '20px',
+    transform: 'translateY(-50%)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '20px',
     zIndex: 1000
   };
 
   const groupContainer = {
     ...glassStyle,
-    padding: '8px 25px',
-    display: 'flex',
-    alignItems: 'center',
+    padding: '12px 8px', // Refined padding
+    flexDirection: 'column',
+    gap: '10px',
+  };
+
+  const utilityContainer = {
+    ...groupContainer,
+    padding: '10px 6px', // Smaller padding for the smaller utility side
     gap: '8px',
   };
 
@@ -43,19 +59,20 @@ const Toolbar = ({ activeTool, onSelectTool, onSave, onLoad, onReset }) => {
     const isHovered = hovered === id;
     const isActive = activeTool === id;
 
-    // Track buttons use yellow (idle) or green (active)
-    // Action buttons use grey
     let bgColor = type === 'action' ? utilityColor : idleTrackColor;
     if (isActive || isHovered) bgColor = activeTrackColor;
 
+    // Refined Sizes: 38px for tools, 32px for utilities
+    const size = type === 'action' ? '32px' : '38px';
+
     return {
-      width: '44px',
-      height: '44px',
-      borderRadius: '15px',
+      width: size,
+      height: size,
+      borderRadius: '10px', // Slightly smaller radius to match new size
       border: 'none',
       outline: 'none',
       backgroundColor: bgColor,
-      color: iconColor, // Use the dark color for the SVG stroke
+      color: iconColor,
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
@@ -66,58 +83,61 @@ const Toolbar = ({ activeTool, onSelectTool, onSave, onLoad, onReset }) => {
   };
 
   return (
-    <div style={masterWrapper}>
-      {/* SECTION 1: Construction Tools */}
-      <div style={groupContainer}>
-        {tools.map((tool) => (
-          <button
-            key={tool.id}
-            title={tool.label}
-            style={getButtonStyle(tool.id, 'track')}
-            onMouseEnter={() => setHovered(tool.id)}
+    <>
+      {/* SECTION 1: Construction Tools (LEFT) */}
+      <div style={leftWrapper}>
+        <div style={groupContainer}>
+          {tools.map((tool) => (
+            <button
+              key={tool.id}
+              title={tool.label}
+              style={getButtonStyle(tool.id, 'track')}
+              onMouseEnter={() => setHovered(tool.id)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => onSelectTool(activeTool === tool.id ? null : tool.id)}
+            >
+              {/* Ensure icons scale down if needed */}
+              <div style={{ transform: 'scale(0.85)' }}>{tool.icon}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* SECTION 2: File Management (RIGHT) */}
+      <div style={rightWrapper}>
+        <div style={utilityContainer}>
+          <button 
+            title="Reset Scene"
+            style={getButtonStyle('reset', 'action')}
+            onClick={onReset}
+            onMouseEnter={() => setHovered('reset')} 
             onMouseLeave={() => setHovered(null)}
-            onClick={() => onSelectTool(activeTool === tool.id ? null : tool.id)}
           >
-            {tool.icon}
+            <div style={{ transform: 'scale(0.8)' }}><ActionIcon type="reset" /></div>
           </button>
-        ))}
-        
-        <div style={{ width: '1px', height: '24px', background: 'rgba(0,0,0,0.1)', margin: '0 4px' }} />
-        
-        <button 
-          title="Reset Scene"
-          style={getButtonStyle('reset', 'action')}
-          onClick={onReset}
-          onMouseEnter={() => setHovered('reset')} 
-          onMouseLeave={() => setHovered(null)}
-        >
-          <ActionIcon type="reset" />
-        </button>
-      </div>
 
-      {/* SECTION 2: File Management */}
-      <div style={groupContainer}>
-        <button 
-          title="Save Track Layout"
-          style={getButtonStyle('save', 'action')}
-          onClick={onSave}
-          onMouseEnter={() => setHovered('save')} 
-          onMouseLeave={() => setHovered(null)}
-        >
-          <ActionIcon type="save" />
-        </button>
+          <button 
+            title="Save Track Layout"
+            style={getButtonStyle('save', 'action')}
+            onClick={onSave}
+            onMouseEnter={() => setHovered('save')} 
+            onMouseLeave={() => setHovered(null)}
+          >
+            <div style={{ transform: 'scale(0.8)' }}><ActionIcon type="save" /></div>
+          </button>
 
-        <label 
-          title="Load Track Layout"
-          onMouseEnter={() => setHovered('load')} 
-          onMouseLeave={() => setHovered(null)}
-          style={{ ...getButtonStyle('load', 'action'), cursor: 'pointer' }}
-        >
-          <ActionIcon type="load" />
-          <input type="file" accept=".json" style={{ display: 'none' }} onChange={onLoad} />
-        </label>
+          <label 
+            title="Load Track Layout"
+            onMouseEnter={() => setHovered('load')} 
+            onMouseLeave={() => setHovered(null)}
+            style={{ ...getButtonStyle('load', 'action'), cursor: 'pointer' }}
+          >
+            <div style={{ transform: 'scale(0.8)' }}><ActionIcon type="load" /></div>
+            <input type="file" accept=".json" style={{ display: 'none' }} onChange={onLoad} />
+          </label>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

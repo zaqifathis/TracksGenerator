@@ -14,18 +14,18 @@ const TrackCounter = ({ tracks = [] }) => {
   const containerStyle = {
     ...glassStyle,
     position: 'absolute',
-    top: '20px',
-    left: '50%',
+    top: '20px',             
+    left: '50%',             
     transform: 'translateX(-50%)',
     display: 'flex',
     alignItems: 'center',
     gap: '20px',
-    padding: '8px 20px',
+    padding: '6px 16px',    
     fontFamily: 'system-ui, -apple-system, sans-serif',
-    pointerEvents: 'none',
+    pointerEvents: 'none',   
     userSelect: 'none',
-    // Ensure the background matches the toolbar's glassStyle exactly
     color: darkColor, 
+    zIndex: 1000            
   };
 
   const CounterItem = ({ icon, count, label }) => (
