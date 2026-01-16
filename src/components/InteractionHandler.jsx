@@ -98,7 +98,8 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
       ports.forEach(port => {
         const dist = mousePos.distanceTo(port.pos);
         if (dist < minDistance) {
-          bestTarget = port;
+          const isOccupied = track.connections && track.connections[port.id] !== null && track.connections[port.id] !== undefined;
+          bestTarget = {...port, isOccupied};
           minDistance = dist;
         }
       });
@@ -142,9 +143,11 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
     let finalRot = 0;
     let finalPosVec = mousePos.clone();
     let isSnapped = false;
+    let isOccupied = false;
 
     if (bestTarget) {
       isSnapped = true;
+      isOccupied = bestTarget.isOccupied;
       // Align so ghost faces AWAY from parent (+ Math.PI)
       finalRot = bestTarget.rot - selectedLocalPort.rot;
       const worldOffset = selectedLocalPort.pos.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), finalRot);
@@ -159,6 +162,7 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
       pos: [finalPosVec.x, 0, finalPosVec.z],
       rot: finalRot,
       isSnapped: isSnapped,
+      isOccupied: isOccupied,
       snapInfo: isSnapped ? { ...bestTarget, ghostPortIndex: ghostPortIndex } : null
     };
   }, [mousePos, ghostPortIndex, activeTool, tracks, isLeft]);
@@ -181,7 +185,7 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
         onClick={() => {
           const isFirstTrack = tracks.length === 0;
   
-          if (activeTool && (isFirstTrack || ghostState.isSnapped)) {
+          if (activeTool && (isFirstTrack || ghostState.isSnapped && !ghostState.isOccupied)) {
             onPlaceTrack(
               activeTool, 
               ghostState.pos,    // Pass the actual ghost position (could be mouse or snapped)
