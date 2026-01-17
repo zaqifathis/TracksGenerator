@@ -1,11 +1,62 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Grid, GizmoHelper, GizmoViewport, Environment } from '@react-three/drei';
 import { DUPLO_STUD } from '../utils/constants';
 import Track from './Track';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import InteractionHandler from './InteractionHandler';
+import { easing } from 'maath';
+import * as THREE from 'three';
 
-const Scene = ({ activeTool, tracks, onPlaceTrack, onDeleteTrack}) => {
+const CameraController = ({ viewMode }) => {
+  const { camera, controls } = useThree();
+  const isTransitioning = useRef(false);
+  
+  // Pre-allocate a vector to avoid creating new objects every frame
+  const targetVec = useRef(new THREE.Vector3());
+
+  useEffect(() => {
+    isTransitioning.current = true;
+    if (controls) {
+      // Ensure controls are updated to match the new target
+      controls.target.set(0, 0, 0);
+      controls.update(); 
+    }
+  }, [viewMode, controls]);
+
+  useFrame((state, delta) => {
+    if (!isTransitioning.current) return;
+
+    const is2D = viewMode === '2D';
+    const targetPos = is2D ? [0, 1500, 0] : [500, 500, 500];
+    const targetUp = is2D ? [0, 0, -1] : [0, 1, 0];
+
+    // 1. Set the pre-allocated vector
+    targetVec.current.set(...targetPos);
+
+    // 2. Perform smooth transitions
+    easing.damp3(camera.position, targetPos, 0.25, delta);
+    easing.damp3(camera.up, targetUp, 0.25, delta);
+    
+    // 3. Keep camera looking at center during transition
+    camera.lookAt(0, 0, 0);
+
+    // 4. STOP CRITICAL FIX: Increased threshold and clean handoff
+    const dist = camera.position.distanceTo(targetVec.current);
+    
+    // If we are within 5 units (or about 0.5% of total travel), stop the force
+    if (dist < 5) {
+      isTransitioning.current = false;
+      // Final snap to target for precision
+      camera.position.copy(targetVec.current);
+      if (controls) controls.update();
+    }
+  });
+
+  return null;
+};
+
+
+const Scene = ({ viewMode, activeTool, tracks, onPlaceTrack, onDeleteTrack, onToggleTrack}) => {
   const [hoveredId, setHoveredId] = useState(null);
 
   return (
@@ -13,7 +64,11 @@ const Scene = ({ activeTool, tracks, onPlaceTrack, onDeleteTrack}) => {
         shadows
         dpr={[1, 2]} 
         gl={{ antialias: true }} 
-        camera={{ position: [500, 500, 500], fov: 45, far: 100000 }}
+        camera={{ 
+        position: viewMode === '3D' ? [500, 500, 500] : [0, 1000, 0], 
+        fov: 45,
+        far: 100000
+      }}
         onCreated={({ gl }) => { gl.setClearColor('#ecebeb'); }}
     >
       <ambientLight intensity={0.7} />
@@ -26,17 +81,22 @@ const Scene = ({ activeTool, tracks, onPlaceTrack, onDeleteTrack}) => {
         shadow-mapSize={[2048, 2048]} 
       />
 
+      <CameraController viewMode={viewMode} />
       <OrbitControls 
         makeDefault 
-        minDistance={100}   
-        maxDistance={3000}
+        enableRotate={viewMode === '3D'}
+        enablePan={true}
+        screenSpacePanning={viewMode === '2D'}
+        maxPolarAngle={viewMode === '3D' ? Math.PI / 3 : Math.PI / 2}
+        minDistance={300}   
+        maxDistance={5000}
         enableDamping={true} 
         dampingFactor={0.05}
       />
 
-      <GizmoHelper alignment="top-right" margin={[80, 80]}>
+      {/* <GizmoHelper alignment="top-right" margin={[80, 80]}>
         <GizmoViewport axisColors={['red', 'green', 'blue']} labelColor="black" />
-      </GizmoHelper>
+      </GizmoHelper> */}
 
       <Grid 
         infiniteGrid

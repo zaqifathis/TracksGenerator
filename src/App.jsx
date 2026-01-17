@@ -4,7 +4,7 @@ import Scene from './components/Scene';
 import Toolbar from './components/UI/Toolbar';
 import TrackCounter from './components/UI/TrackCounter';
 import { generateUUID } from 'three/src/math/MathUtils.js';
-
+import ViewToggle from './components/UI/ViewToggle';
 
 // --- File Validator ---
 const isValidTrackData = (data) => {
@@ -20,6 +20,7 @@ const isValidTrackData = (data) => {
 function App() {
   const [activeTool, setActiveTool] = useState(null);
   const [tracks, setTracks] = useState([]);
+  const [viewMode, setViewMode] = useState('2D');
 
   useEffect(() => {
     const handleKeyDown = (e) => e.key === 'Escape' && setActiveTool(null);
@@ -125,7 +126,9 @@ function App() {
         onLoad={loadTracks}
         onReset={resetTracks} 
       />
+      <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
       <Scene 
+        viewMode={viewMode}
         activeTool={activeTool} 
         tracks={tracks} 
         onPlaceTrack={addTrack}
