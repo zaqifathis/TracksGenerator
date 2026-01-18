@@ -11,10 +11,11 @@ export const uiTheme = {
 export const interactionColor = {
     occupied: '#ff4444',
     snap: '#44ff44',
-    default: '#8a8a8a'
+    default: '#8a8a8a',
+    selected: 'rgba(177, 174, 4, 0.89)'
 }
 
-export const trackColor = {
+export const trackColors = {
     straight: '#0b3c66',
     curved: '#7e0c6b',
     y_track:'#b31552',

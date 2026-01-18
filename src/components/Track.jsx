@@ -9,6 +9,8 @@ import { TrackCross60 } from './models/TrackCross60';
 import { TrackCurvedLeft } from './models/TrackCurvedLeft';
 import { TrackYSwitch } from './models/TrackYSwitch';
 import { TrackCross90 } from './models/TrackCross90';
+import { interactionColor } from '../constants/theme';
+import { trackColors } from '../constants/theme';
 
 const Track = ({ 
   position= [0, 0, 0],
@@ -94,16 +96,16 @@ const Track = ({
 
   let trackColor;
   if (isSelected) {
-    trackColor = '#ffffff'; // White highlight when hovering for delete
+    trackColor = interactionColor.selected;
   } else if (isGhost) {
-    if (isOccupied) trackColor = '#ff0000';
-    else if (isSnapped) trackColor = '#cfb912';
-    else trackColor = '#a3a3a3';
+    if (isOccupied) trackColor = interactionColor.occupied;
+    else if (isSnapped) trackColor = interactionColor.snap;
+    else trackColor = interactionColor.default;
   } else {
-      if (type === "STRAIGHT") trackColor = '#0b3c66'
-      if (type === "CURVED") trackColor = '#7e0c6b'
-      if (type === "Y_TRACK") trackColor = '#b31552'
-      if (type === "X_TRACK") trackColor = '#0e798b'
+      if (type === "STRAIGHT") trackColor = trackColors.straight;
+      if (type === "CURVED") trackColor = trackColors.curved
+      if (type === "Y_TRACK") trackColor = trackColors.y_track
+      if (type === "X_TRACK") trackColor = trackColors.x_track
   }
 
   return (
@@ -119,17 +121,24 @@ const Track = ({
           isGhost={isGhost}
           isOccupied={isOccupied}
           isSnapped={isSnapped}
+          isSelected={isSelected}
         />
       )}
       {type === 'CURVED' && (
-        isLeft ? (<TrackCurvedLeft isGhost={isGhost} isOccupied={isOccupied} isSnapped={isSnapped}/>) : 
-        (<TrackCurved isGhost={isGhost} isOccupied={isOccupied} isSnapped={isSnapped}/>)
+        isLeft ? (<TrackCurvedLeft isGhost={isGhost} isOccupied={isOccupied} isSnapped={isSnapped} isSelected={isSelected}/>) : 
+        (<TrackCurved 
+          isGhost={isGhost} 
+          isOccupied={isOccupied} 
+          isSnapped={isSnapped}
+          isSelected={isSelected}
+          />)
       )}
       {type === 'X_TRACK' && (
         <TrackCross60 
           isGhost={isGhost}
           isOccupied={isOccupied}
           isSnapped={isSnapped}
+          isSelected={isSelected}
         />
       )}
       {type === 'Y_TRACK' && (
@@ -137,6 +146,7 @@ const Track = ({
           isGhost={isGhost}
           isOccupied={isOccupied}
           isSnapped={isSnapped}
+          isSelected={isSelected}
         />
       )}
       {type === 'CROSS_90' && (
@@ -144,6 +154,7 @@ const Track = ({
           isGhost={isGhost}
           isOccupied={isOccupied}
           isSnapped={isSnapped}
+          isSelected={isSelected}
         />
       )}
       {paths.map((pts, index) => {
@@ -151,7 +162,7 @@ const Track = ({
           <Line 
             key={index}
             points={pts}
-            visible={true} 
+            visible={false} // turn true for check
             color={trackColor} 
             lineWidth={isSelected ? 6 : (isGhost ? 5 : 3)} 
             transparent={isGhost} 

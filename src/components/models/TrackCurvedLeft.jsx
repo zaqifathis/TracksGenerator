@@ -6,12 +6,13 @@ import React, { useRef } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { interactionColor } from '../../constants/theme';
 
-export function TrackCurvedLeft({ isGhost, isOccupied, isSnapped, ...props }) {
+export function TrackCurvedLeft({ isGhost, isOccupied, isSnapped, isSelected, ...props }) {
   const { nodes, materials } = useGLTF('/models/track_curved_L-opt.glb')
 
   const getMaterialColor = () => {
     if (isOccupied) return interactionColor.occupied;
     if (isSnapped) return interactionColor.snap;  
+    if (isSelected) return interactionColor.selected;
     return interactionColor.default;                 
   }
 
