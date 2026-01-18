@@ -1,79 +1,29 @@
 import { useState } from 'react';
 import { glassStyle } from './glassStyle';
-import { StraightIcon, CurveIcon, YIcon, XIcon, Cross90Icon, ActionIcon } from './Icons';
-
-// UI Colors
-const activeTrackColor = '#0ceda2'; 
-const idleTrackColor = 'rgba(177, 174, 4, 0.89)'; 
-const utilityColor = 'rgba(186, 186, 186, 0.89)'; 
-const iconColor = '#222222'; 
+import { ActionIcon } from './Icons';
+import { TRACK_TOOLS } from '../../constants/trackConfig';
+import { uiTheme } from '../../constants/theme'; //
 
 const Toolbar = ({ activeTool, onSelectTool, onSave, onLoad, onReset }) => {
   const [hovered, setHovered] = useState(null);
-
-  const tools = [
-    { id: 'STRAIGHT', label: 'Straight Track', icon: <StraightIcon /> },
-    { id: 'CURVED', label: 'Curve Track', icon: <CurveIcon /> },
-    { id: 'Y_TRACK', label: 'Y-Switch', icon: <YIcon /> },
-    { id: 'X_TRACK', label: 'X-Crossing', icon: <XIcon /> },
-    { id: 'CROSS_90', label: '90° Cross', icon: <Cross90Icon /> }
-  ];
-
-  // Construction Tools (Left Side) - Primary
-  const leftWrapper = {
-    position: 'absolute',
-    top: '50%',
-    left: '20px',
-    transform: 'translateY(-50%)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    zIndex: 1000
-  };
-
-  // Utility Actions (Right Side) - Secondary
-  const rightWrapper = {
-    position: 'absolute',
-    top: '50%',
-    right: '20px',
-    transform: 'translateY(-50%)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    zIndex: 1000
-  };
-
-  const groupContainer = {
-    ...glassStyle,
-    padding: '12px 8px', // Refined padding
-    flexDirection: 'column',
-    gap: '10px',
-  };
-
-  const utilityContainer = {
-    ...groupContainer,
-    padding: '10px 6px', // Smaller padding for the smaller utility side
-    gap: '8px',
-  };
 
   const getButtonStyle = (id, type = 'track') => {
     const isHovered = hovered === id;
     const isActive = activeTool === id;
 
-    let bgColor = type === 'action' ? utilityColor : idleTrackColor;
-    if (isActive || isHovered) bgColor = activeTrackColor;
-
-    // Refined Sizes: 38px for tools, 32px for utilities
-    const size = type === 'action' ? '32px' : '38px';
+    let bgColor = type === 'action' ? uiTheme.utilityIdle : uiTheme.trackIdle;
+    if (isActive || isHovered) {
+      bgColor = uiTheme.accent;
+    }
 
     return {
-      width: size,
-      height: size,
-      borderRadius: '10px', // Slightly smaller radius to match new size
+      width: type === 'action' ? '32px' : '38px',
+      height: type === 'action' ? '32px' : '38px',
+      borderRadius: '10px',
       border: 'none',
       outline: 'none',
       backgroundColor: bgColor,
-      color: iconColor,
+      color: uiTheme.background, //
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
@@ -86,56 +36,45 @@ const Toolbar = ({ activeTool, onSelectTool, onSave, onLoad, onReset }) => {
   return (
     <>
       {/* SECTION 1: Construction Tools (LEFT) */}
-      <div style={leftWrapper}>
-        <div style={groupContainer}>
-          {tools.map((tool) => (
+      <div style={{ position: 'absolute', top: '50%', left: '20px', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: '20px', zIndex: 1000 }}>
+        <div style={{ ...glassStyle, padding: '12px 8px', flexDirection: 'column', gap: '10px' }}>
+          {TRACK_TOOLS.map(({ id, icon: Icon, label }) => (
             <button
-              key={tool.id}
-              title={tool.label}
-              style={getButtonStyle(tool.id, 'track')}
-              onMouseEnter={() => setHovered(tool.id)}
+              key={id}
+              title={label}
+              style={getButtonStyle(id, 'track')}
+              onMouseEnter={() => setHovered(id)}
               onMouseLeave={() => setHovered(null)}
-              onClick={() => onSelectTool(activeTool === tool.id ? null : tool.id)}
+              onClick={() => onSelectTool(activeTool === id ? null : id)}
             >
-              {/* Ensure icons scale down if needed */}
-              <div style={{ transform: 'scale(0.85)' }}>{tool.icon}</div>
+              <div style={{ transform: 'scale(0.85)' }}><Icon /></div>
             </button>
           ))}
         </div>
       </div>
 
       {/* SECTION 2: File Management (RIGHT) */}
-      <div style={rightWrapper}>
-        <div style={utilityContainer}>
-          <button 
-            title="Reset Scene"
-            style={getButtonStyle('reset', 'action')}
-            onClick={onReset}
-            onMouseEnter={() => setHovered('reset')} 
-            onMouseLeave={() => setHovered(null)}
-          >
-            <div style={{ transform: 'scale(0.8)' }}><ActionIcon type="reset" /></div>
-          </button>
-
-          <button 
-            title="Save Track Layout"
-            style={getButtonStyle('save', 'action')}
-            onClick={onSave}
-            onMouseEnter={() => setHovered('save')} 
-            onMouseLeave={() => setHovered(null)}
-          >
-            <div style={{ transform: 'scale(0.8)' }}><ActionIcon type="save" /></div>
-          </button>
-
-          <label 
-            title="Load Track Layout"
-            onMouseEnter={() => setHovered('load')} 
-            onMouseLeave={() => setHovered(null)}
-            style={{ ...getButtonStyle('load', 'action'), cursor: 'pointer' }}
-          >
-            <div style={{ transform: 'scale(0.8)' }}><ActionIcon type="load" /></div>
-            <input type="file" accept=".json" style={{ display: 'none' }} onChange={onLoad} />
-          </label>
+      <div style={{ position: 'absolute', top: '50%', right: '20px', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: '20px', zIndex: 1000 }}>
+        <div style={{ ...glassStyle, padding: '10px 6px', flexDirection: 'column', gap: '8px' }}>
+          {['reset', 'save', 'load'].map((type) => (
+            <button 
+              key={type}
+              title={`${type.charAt(0).toUpperCase() + type.slice(1)} Scene`}
+              style={getButtonStyle(type, 'action')}
+              onClick={type === 'load' ? undefined : (type === 'save' ? onSave : onReset)}
+              onMouseEnter={() => setHovered(type)} 
+              onMouseLeave={() => setHovered(null)}
+            >
+              {type === 'load' ? (
+                <label style={{ cursor: 'pointer', display: 'flex' }}>
+                   <div style={{ transform: 'scale(0.8)' }}><ActionIcon type="load" /></div>
+                   <input type="file" accept=".json" style={{ display: 'none' }} onChange={onLoad} />
+                </label>
+              ) : (
+                <div style={{ transform: 'scale(0.8)' }}><ActionIcon type={type} /></div>
+              )}
+            </button>
+          ))}
         </div>
       </div>
     </>

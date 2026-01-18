@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { STRAIGHT_LENGTH,CURVE_ANGLE, CURVE_RADIUS } from '../utils/constants';
+import { STRAIGHT_LENGTH,CURVE_ANGLE, CURVE_RADIUS } from '../constants/constants';
 import { Plane } from '@react-three/drei';
 import { useState, useEffect, useMemo } from 'react';
 import Track from './Track';

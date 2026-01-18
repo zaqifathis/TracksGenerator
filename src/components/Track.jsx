@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Line, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from '../utils/constants';
+import { STRAIGHT_LENGTH, CURVE_RADIUS, CURVE_ANGLE } from '../constants/constants';
 
 import {TrackStraight} from './models/TrackStraight';
 import { TrackCurved } from './models/TrackCurved';

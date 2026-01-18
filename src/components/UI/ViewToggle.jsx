@@ -1,26 +1,14 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { glassStyle } from './glassStyle';
+import { uiTheme } from '../../constants/theme';
 
 const ViewToggle = ({ viewMode, setViewMode }) => {
-  const rootStyle = {
-    ...glassStyle,
-    position: 'absolute',
-    bottom: '30px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    display: 'inline-flex',
-    borderRadius: '50px',
-    padding: '4px 15px',
-    gap: '4px',
-    zIndex: 1000,
-  };
-
   const itemStyle = (val) => {
     const isActive = viewMode === val;
     return {
       all: 'unset',
-      backgroundColor: isActive ? '#0ceda2' : 'transparent',
-      color: isActive ? '#222222' : '#7a7a7a',
+      backgroundColor: isActive ? uiTheme.accent : 'transparent',
+      color: isActive ? uiTheme.background : uiTheme.secondary,
       padding: '8px 15px',
       borderRadius: '8px',
       fontSize: '12px',
@@ -39,14 +27,10 @@ const ViewToggle = ({ viewMode, setViewMode }) => {
       type="single"
       value={viewMode}
       onValueChange={(value) => { if (value) setViewMode(value); }}
-      style={rootStyle}
+      style={{ ...glassStyle, position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', padding: '4px 15px', gap: '4px', zIndex: 1000 }}
     >
-      <ToggleGroup.Item value="2D" style={itemStyle("2D")}>
-        2D
-      </ToggleGroup.Item>
-      <ToggleGroup.Item value="3D" style={itemStyle("3D")}>
-        3D
-      </ToggleGroup.Item>
+      <ToggleGroup.Item value="2D" style={itemStyle("2D")}>2D</ToggleGroup.Item>
+      <ToggleGroup.Item value="3D" style={itemStyle("3D")}>3D</ToggleGroup.Item>
     </ToggleGroup.Root>
   );
 };

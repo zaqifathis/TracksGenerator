@@ -1,21 +1,12 @@
 import { glassStyle } from './glassStyle';
-import { StraightIcon, CurveIcon, YIcon, XIcon, Cross90Icon } from './Icons';
-
-// Styled to be dark grey/black for better visibility on the light glass
-const darkColor = '#7a7a7a'; 
-const badgeBg = 'rgba(0, 0, 0, 0.1)'; // Subtle dark tint for the number badge
+import { TRACK_TOOLS } from '../../constants/trackConfig';
+import { uiTheme } from '../../constants/theme';
 
 const TrackCounter = ({ tracks = [] }) => {
-  const straightCount = tracks.filter(t => t.type === 'STRAIGHT').length;
-  const curveCount = tracks.filter(t => t.type === 'CURVED').length;
-  const yCount = tracks.filter(t => t.type === 'Y_TRACK').length;
-  const xCount = tracks.filter(t => t.type === 'X_TRACK').length;
-  const cross90Count = tracks.filter(t => t.type === 'CROSS_90').length;
-
   const containerStyle = {
     ...glassStyle,
     position: 'absolute',
-    top: '20px',             
+    bottom: '30px',           
     left: '50%',             
     transform: 'translateX(-50%)',
     display: 'flex',
@@ -24,39 +15,26 @@ const TrackCounter = ({ tracks = [] }) => {
     padding: '6px 16px',    
     fontFamily: 'system-ui, -apple-system, sans-serif',
     pointerEvents: 'none',   
-    userSelect: 'none',
-    color: darkColor, 
+    color: uiTheme.secondary, 
     zIndex: 1000            
   };
 
-  const CounterItem = ({ icon, count, label }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} title={label}>
-      {/* Icon wrapper to force the dark color onto the SVG stroke */}
-      <div style={{ color: darkColor, display: 'flex', opacity: 0.8 }}>
-        {icon}
-      </div>
-      <div style={{
-        backgroundColor: badgeBg,
-        padding: '2px 8px',
-        borderRadius: '6px',
-        color: darkColor,
-        fontSize: '12px',
-        fontWeight: 'bold',
-        minWidth: '14px',
-        textAlign: 'center'
-      }}>
-        {count}
-      </div>
-    </div>
-  );
-
   return (
     <div style={containerStyle}>
-      <CounterItem icon={<StraightIcon />} count={straightCount} label="Straights" />
-      <CounterItem icon={<CurveIcon />} count={curveCount} label="Curves" />
-      <CounterItem icon={<YIcon />} count={yCount} label="Y-Switches" />
-      <CounterItem icon={<XIcon />} count={xCount} label="X-Crossings" />
-      <CounterItem icon={<Cross90Icon />} count={cross90Count} label="90-Crosses" />
+      {TRACK_TOOLS.map(({ id, icon: Icon, label }) => (
+        <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }} title={label}>
+          <div style={{ color: uiTheme.secondary, display: 'flex', opacity: 0.8 }}>
+            <Icon />
+          </div>
+          <div style={{
+            backgroundColor: uiTheme.badgeBg, 
+            padding: '2px 8px', borderRadius: '6px',
+            fontSize: '12px', fontWeight: 'bold', minWidth: '14px', textAlign: 'center'
+          }}>
+            {tracks.filter(t => t.type === id).length}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

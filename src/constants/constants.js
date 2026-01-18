@@ -17,15 +17,5 @@ export const CURVE_RADIUS = 16.165 * DUPLO_STUD;    // 127.980mm length
 // 30 degrees (3 pieces = 90 degrees)
 export const CURVE_ANGLE = Math.PI / 6;
 
-export const interactionColor = {
-    occupied: '#ff4444',
-    snap: '#44ff44',
-    default: '#8a8a8a'
-}
 
-export const trackColor = {
-    straight: '#0b3c66',
-    curved: '#7e0c6b',
-    y_track:'#b31552',
-    x_track: '#0e798b'
-}
+

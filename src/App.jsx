@@ -5,6 +5,7 @@ import Toolbar from './components/UI/Toolbar';
 import TrackCounter from './components/UI/TrackCounter';
 import { generateUUID } from 'three/src/math/MathUtils.js';
 import ViewToggle from './components/UI/ViewToggle';
+import HelpMenu from './components/UI/HelpMenu';
 
 // --- File Validator ---
 const isValidTrackData = (data) => {
@@ -104,7 +105,6 @@ function App() {
         .map(t => {
           if (!t.connections) return t;
           
-          // Scrub the deleted track ID from all connection ports
           const newConnections = { ...t.connections };
           Object.keys(newConnections).forEach(port => {
             if (newConnections[port] === trackId) {
@@ -121,18 +121,21 @@ function App() {
     <div style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, overflow: 'hidden' }}>
       <TrackCounter tracks={tracks} />
       <Toolbar 
+        activeTool={activeTool}
         onSelectTool={setActiveTool} 
         onSave={saveTracks} 
         onLoad={loadTracks}
         onReset={resetTracks} 
       />
       <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+      <HelpMenu />
       <Scene 
         viewMode={viewMode}
         activeTool={activeTool} 
         tracks={tracks} 
         onPlaceTrack={addTrack}
         onDeleteTrack={deleteTrack}
+        onToggleTrack={() => {}}
       />
     </div>
   );

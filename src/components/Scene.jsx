@@ -1,6 +1,6 @@
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, Grid, GizmoHelper, GizmoViewport, Environment } from '@react-three/drei';
-import { DUPLO_STUD } from '../utils/constants';
+import { DUPLO_STUD } from '../constants/constants';
 import Track from './Track';
 import { useState, useEffect, useRef } from 'react';
 import InteractionHandler from './InteractionHandler';
@@ -17,7 +17,6 @@ const CameraController = ({ viewMode }) => {
   useEffect(() => {
     isTransitioning.current = true;
     if (controls) {
-      // Ensure controls are updated to match the new target
       controls.target.set(0, 0, 0);
       controls.update(); 
     }
@@ -30,23 +29,16 @@ const CameraController = ({ viewMode }) => {
     const targetPos = is2D ? [0, 1500, 0] : [500, 500, 500];
     const targetUp = is2D ? [0, 0, -1] : [0, 1, 0];
 
-    // 1. Set the pre-allocated vector
     targetVec.current.set(...targetPos);
-
-    // 2. Perform smooth transitions
     easing.damp3(camera.position, targetPos, 0.25, delta);
     easing.damp3(camera.up, targetUp, 0.25, delta);
-    
-    // 3. Keep camera looking at center during transition
     camera.lookAt(0, 0, 0);
 
-    // 4. STOP CRITICAL FIX: Increased threshold and clean handoff
     const dist = camera.position.distanceTo(targetVec.current);
     
     // If we are within 5 units (or about 0.5% of total travel), stop the force
     if (dist < 5) {
       isTransitioning.current = false;
-      // Final snap to target for precision
       camera.position.copy(targetVec.current);
       if (controls) controls.update();
     }
@@ -93,10 +85,6 @@ const Scene = ({ viewMode, activeTool, tracks, onPlaceTrack, onDeleteTrack, onTo
         enableDamping={true} 
         dampingFactor={0.05}
       />
-
-      {/* <GizmoHelper alignment="top-right" margin={[80, 80]}>
-        <GizmoViewport axisColors={['red', 'green', 'blue']} labelColor="black" />
-      </GizmoHelper> */}
 
       <Grid 
         infiniteGrid
