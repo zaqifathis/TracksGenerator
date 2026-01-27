@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Plane } from '@react-three/drei';
 import { useState, useEffect, useMemo } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 
 import Track from './Track';
 import { checkTrackCollision } from '../utils/trackIntersection';
@@ -11,21 +12,22 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
   const [ghostPortIndex, setGhostPortIndex] = useState(0);
   const [mousePos, setMousePos] = useState(new THREE.Vector3(0, 0, 0));
   const [ghostGeometry, setGhostGeometry] = useState(null);
+  const { raycaster, pointer, camera, scene } = useThree();
 
   useEffect(() => {
     setIsLeft(false);
     setGhostPortIndex(0);
   }, [activeTool]);
 
-  const handlePointerMove = (e) => {
+  useFrame(() => {
     if (!activeTool) return;
-    const floor = e.intersections.find(i => i.object.name === 'interaction-floor');
-    if (floor) {
-      setMousePos(floor.point);
-    } else {
-      setMousePos(new THREE.Vector3(e.point.x, 0, e.point.z));
+    raycaster.setFromCamera(pointer, camera);
+    const hits = raycaster.intersectObjects(scene.children, true);
+    const floorHit = hits.find(h => h.object.name === 'interaction-floor');
+    if (floorHit) {
+      setMousePos(floorHit.point);
     }
-  };
+  });
 
   const ghostState = useMemo(() => {
     if (!activeTool) return null;
@@ -131,7 +133,6 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
         name="interaction-floor"
         args={[10000, 10000]} 
         rotation={[-Math.PI / 2, 0, 0]} 
-        onPointerMove={handlePointerMove}
         onContextMenu={(e) => {
           if (!activeTool) return;
           e.nativeEvent.preventDefault();
@@ -168,7 +169,7 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
             isOccupied={ghostState.isOccupied}
             isSnapped={ghostState.isSnapped}
             onGeometryReady={setGhostGeometry}
-            raycast={null}
+            raycast={() => null}
           />
         </group>
       )}
