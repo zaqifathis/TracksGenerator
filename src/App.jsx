@@ -43,12 +43,21 @@ function App() {
 
   // --- SAVE TRACKS ---
   const saveTracks = () => {
-    const dataStr = JSON.stringify(tracks, null, 2);
+    const persistentData = tracks.map(({ id, type, isLeft, position, rotation, connections }) => ({
+      id,
+      type,
+      isLeft,
+      position,
+      rotation,
+      connections
+    }));
+
+    const dataStr = JSON.stringify(persistentData, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'my-rail-track.json';
+    link.download = 'my-rail-layout.json';
     link.click();
     URL.revokeObjectURL(url);
   };
