@@ -9,7 +9,8 @@ import Toolbar from './components/UI/Toolbar';
 import TrackCounter from './components/UI/TrackCounter';
 import ViewToggle from './components/UI/ViewToggle';
 import HelpMenu from './components/UI/HelpMenu';
-import { getTrackPaths, getPortsTrack } from './constants/trackPaths';
+import { getPortsTrack } from './constants/trackPaths';
+import { useTrackStorage } from './utils/useTrackStorage';
 
 if (!THREE.BufferGeometry.prototype.computeBoundsTree) {
   THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -17,20 +18,9 @@ if (!THREE.BufferGeometry.prototype.computeBoundsTree) {
   THREE.Mesh.prototype.raycast = acceleratedRaycast;
 }
 
-// --- File Validator ---
-const isValidTrackData = (data) => {
-  if (!Array.isArray(data)) return false;
-  return data.every(track => (
-    typeof track.id === 'string' &&
-    ['STRAIGHT', 'CURVED', 'Y_TRACK', 'X_TRACK', 'CROSS_90'].includes(track.type) &&
-    Array.isArray(track.position) &&
-    typeof track.rotation === 'number'
-  ));
-};
-
 function App() {
   const [activeTool, setActiveTool] = useState(null);
-  const [tracks, setTracks] = useState([]);
+  const { tracks, setTracks, saveTracks, loadTracks } = useTrackStorage();  
   const [viewMode, setViewMode] = useState('2D');
 
   useEffect(() => {
@@ -41,46 +31,10 @@ function App() {
 
   const resetTracks = () => setTracks([]);
 
-  // --- SAVE TRACKS ---
-  const saveTracks = () => {
-    const persistentData = tracks.map(({ id, type, isLeft, position, rotation, connections }) => ({
-      id,
-      type,
-      isLeft,
-      position,
-      rotation,
-      connections
-    }));
-
-    const dataStr = JSON.stringify(persistentData, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'my-rail-layout.json';
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   const updateTrackGeometry = (trackId, geometry) => {
     setTracks(prev => prev.map(t => 
       t.id === trackId ? { ...t, geometry } : t
     ));
-  };
-
-  // --- LOAD TRACKS ---
-  const loadTracks = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const loaded = JSON.parse(e.target.result);
-        if (isValidTrackData(loaded)) setTracks(loaded);
-        else alert("Invalid JSON format.");
-      } catch (err) { alert("Failed to parse JSON."); }
-    };
-    reader.readAsText(file);
   };
 
   // --- NEW ADD TRACK LOGIC ---
