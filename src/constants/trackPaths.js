@@ -132,8 +132,8 @@ export const getPortsTrack = (type, isLeft = false) => {
     case 'CROSS_90': {
       const half = STRAIGHT_LENGTH / 2;
       ports.push({ pos: new THREE.Vector3(0, 0, 0), rot: Math.PI, id: 'a_start' });
-      ports.push({ pos: new THREE.Vector3(0, 0, STRAIGHT_LENGTH), rot: 0, id: 'a_end' });
       ports.push({ pos: new THREE.Vector3(-half, 0, half), rot: -Math.PI / 2, id: 'b_start' });
+      ports.push({ pos: new THREE.Vector3(0, 0, STRAIGHT_LENGTH), rot: 0, id: 'a_end' });
       ports.push({ pos: new THREE.Vector3(half, 0, half), rot: Math.PI / 2, id: 'b_end' });
       break;
     }

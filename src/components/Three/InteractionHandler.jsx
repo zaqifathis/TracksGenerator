@@ -59,9 +59,10 @@ const InteractionHandler = ({ activeTool, tracks = [], onPlaceTrack }) => {
     const localPortsList = getPortsTrack(activeTool, isLeft);
 
     const portToUse =( activeTool === 'Y_TRACK') ? localPortsList[ghostPortIndex % localPortsList.length]
-      : (activeTool === 'X_TRACK') ? localPortsList[ghostPortIndex % (localPortsList.length/2)] : localPortsList[0];
+      : (activeTool === 'X_TRACK' || activeTool === 'CROSS_90') ? localPortsList[ghostPortIndex % (localPortsList.length/2)] : localPortsList[0];
 
     const selectedLocalPort = {
+      id: portToUse.id,
       pos: portToUse.pos,
       rot: portToUse.rot + Math.PI // We rotate 180 because we "look into" the port to snap
     };

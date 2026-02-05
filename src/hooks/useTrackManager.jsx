@@ -51,7 +51,7 @@ export const useTrackManager = (initialTracks = []) => {
         if (type === 'Y_TRACK') {
           const yPorts = ['start', 'end_left', 'end_right'];
           primaryPortId = yPorts[snapInfo.ghostPortIndex % 3];
-        } else if (type === 'X_TRACK') {
+        } else if (type === 'X_TRACK' || type === 'CROSS_90') {
           const xPorts = ['a_start', 'b_start'];
           primaryPortId = xPorts[snapInfo.ghostPortIndex % 2];
         }
